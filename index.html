@@ -1240,6 +1240,16 @@ window.onload = () => {
     });
 };
 
+socket.on('updateMessage', (msg) => {
+    // Update existing element or add if missing
+    createMessageElement(msg);
+});
+socket.on('deleteMessage', ({ id }) => {
+    const el = messageBoard.querySelector(`[data-id="${id}"]`);
+    if (el) el.remove();
+});
+
 </script>
 </body>
+
 </html>
