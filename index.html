@@ -1,0 +1,1245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat&family=Poppins&family=Raleway&family=Quicksand&family=Nunito&family=Rubik&family=DM+Sans&family=Barlow&family=Work+Sans&display=swap" rel="stylesheet">
+    <title>Appreciation & Farewell Messages</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+            background-color: #a4d0dc;
+            background-image:
+            radial-gradient(circle at 20% 30%, rgba(255, 255, 255, 0.6) 1.2px, transparent 0), /* Dot 1: Position, Opacity, Size */
+            radial-gradient(circle at 70% 80%, rgba(255, 255, 255, 0.5) 1.4px, transparent 0), /* Dot 2: Different position, slightly larger */
+            radial-gradient(circle at 45% 10%, rgba(255, 255, 255, 0.7) 1px, transparent 0), /* Dot 3: Another position, slightly smaller */
+            radial-gradient(circle at 90% 40%, rgba(255, 255, 255, 0.4) 1.2px, transparent 0); /* Dot 4: More dots for better coverage */
+            background-size: 80px 80px, 90px 90px, 75px 75px, 110px 110px; /* Varying sizes for repeat patterns */
+            animation: shimmer 20s linear forwards; /* Shimmer for 20s and then stops */
+        }
+
+        @keyframes shimmer {
+            from { background-position: 0 0; }
+            to { background-position: 150px 150px; } /* Reduced movement distance */
+        }
+
+        .message-board-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            grid-auto-rows: 1px;
+            gap: 1rem;
+            overflow-y: auto;
+            border-radius: 0.5rem;
+            padding: 1.5rem;
+            background-color: #ffffff;
+            border: 2px solid #e5e5e5;
+            position: relative; /* Crucial for positioning inner absolute elements */
+        }
+        .note-message {
+            border-radius: 0.5rem;
+            padding: 1.5rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            line-height: 1.4;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: transform 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
+            position: relative;
+            height: fit-content;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            cursor: pointer; /* Indicate clickable */
+        }
+        .note-message img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 0.5rem;
+            margin-top: 1rem;
+        }
+        .note-message:hover {
+            transform: scale(1.02);
+            box-shadow: 0 8px 12px rgba(0, 0, 0, 0.2);
+        }
+        .format-button.active {
+            background-color: #555555;
+            color: #ffffff;
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.6);
+        }
+        input[type="file"] {
+            display: none;
+        }
+        .emoji-picker {
+            position: absolute;
+            bottom: 100%;
+            left: 0;
+            background-color: #ffffff;
+            border: 1px solid #e5e5e5;
+            border-radius: 0.5rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            padding: 0.5rem;
+            z-index: 10;
+            display: grid;
+            grid-template-columns: repeat(8, 1fr);
+            gap: 0.25rem;
+        }
+        .emoji-picker button {
+            padding: 0.25rem;
+            font-size: 1.25rem;
+            line-height: 1;
+            background-color: transparent;
+            border: none;
+            cursor: pointer;
+            border-radius: 0.25rem;
+            transition: background-color 0.2s;
+        }
+        .emoji-picker button:hover {
+            background-color: #f0f0f0;
+        }
+        [contenteditable]:empty:before {
+            content: attr(placeholder);
+            color: #9ca3af;
+            pointer-events: none;
+        }
+        /* --- START: Changes for Edit/Delete Visibility --- */
+        .note-actions {
+            position: absolute;
+            top: 0.5rem;
+            right: 0.5rem;
+            display: none; /* Hidden by default */
+            gap: 0.5rem;
+            background: rgba(0, 0, 0, 0.5); /* Semi-transparent background for buttons */
+            backdrop-filter: blur(5px);
+            border-radius: 0.25rem;
+            padding: 0.25rem 0.5rem;
+            z-index: 1; /* Ensure buttons are above text */
+        }
+        /* Show individual note actions when the note is active for editing AND global edit mode is active */
+        .message-board-container.editing-mode-active .note-message.active-note-for-editing .note-actions {
+            display: flex;
+        }
+        .note-actions button {
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 0.25rem;
+            padding: 0.25rem 0.5rem;
+            font-size: 0.75rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            color: #ffffff;
+        }
+        .note-actions button:hover {
+            background: rgba(0, 0, 0, 0.8);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        /* Visual cue for editable content */
+        .message-board-container.editing-mode-active .note-message.active-note-for-editing .text-paragraph[contenteditable="true"] {
+            outline: 1px dashed #a4d0dc; /* Light blue dashed outline */
+            padding: 2px; /* Add a little padding so outline doesn't cut text */
+            border-radius: 0.25rem;
+        }
+        /* Hide the individual edit-note-button on hover, as global edit button handles it now */
+        .edit-note-button { /* This button is no longer used for individual note editing */
+            display: none; /* Ensure it's hidden */
+        }
+
+        /* Global action buttons (pencil and expand) */
+        .global-board-action-button {
+            position: absolute;
+            background: rgba(0, 0, 0, 0.3); /* Translucent */
+            color: white;
+            border-radius: 9999px; /* Fully rounded */
+            width: 3rem; /* Larger touch target */
+            height: 3rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            cursor: pointer;
+            transition: background 0.3s ease, transform 0.2s ease, opacity 0.3s ease;
+            opacity: 0.6; /* Initial translucency */
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            z-index: 60; /* Above notes, below modal */
+        }
+
+        .global-board-action-button:hover {
+            opacity: 1; /* Less translucent on hover */
+            background: rgba(0, 0, 0, 0.7);
+            transform: scale(1.1);
+        }
+        /* Positioning for the global buttons relative to the message board */
+        #global-edit-board-button {
+            bottom: 1rem; /* Adjust as needed */
+            right: 4.5rem; /* Space for expand button */
+        }
+        #global-view-board-button {
+            bottom: 1rem; /* Adjust as needed */
+            right: 1rem;
+        }
+        /* Disable global edit button when expanded */
+        #global-edit-board-button:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+            transform: none;
+            background: rgba(0,0,0,0.1);
+        }
+        /* --- END: Changes for Edit/Delete Visibility --- */
+
+        /* --- START: Custom Modal Styles --- */
+        #custom-modal {
+            transition: opacity 0.3s ease;
+        }
+        #custom-modal.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+        /* --- END: Custom Modal Styles --- */
+
+        /* --- START: Expanded Board Styles --- */
+        #expanded-board-overlay {
+            position: fixed;
+            inset: 0; /* top, right, bottom, left to 0 */
+            background-color: #ffffff; /* White background for expanded state */
+            z-index: 90; /* Below the modal, above other content */
+            display: flex;
+            flex-direction: column;
+            padding: 1rem;
+            transition: transform 0.3s ease-out;
+            transform: translateY(100%); /* Start off-screen */
+        }
+        #expanded-board-overlay.active {
+            transform: translateY(0); /* Slide into view */
+        }
+        #expanded-board-overlay .message-board-container {
+            flex-grow: 1; /* Take up available space */
+            border: none; /* Remove border in expanded view */
+            box-shadow: none; /* Remove shadow in expanded view */
+            padding: 0; /* Adjust padding */
+        }
+        #expanded-board-overlay .close-expanded-board-button {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background-color: #ef4444; /* Red */
+            color: white;
+            border-radius: 9999px; /* Full rounded */
+            width: 2.5rem;
+            height: 2.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            z-index: 95; /* Above the board, below modal */
+        }
+        #expanded-board-overlay .close-expanded-board-button:hover {
+            background-color: #dc2626; /* Darker red */
+        }
+
+        /* Hide the main content when the board is expanded */
+        .main-content-wrapper.hidden-when-expanded {
+            display: none;
+        }
+        /* --- END: Expanded Board Styles --- */
+
+        #image-status-text {
+            margin-left: 0.5rem;
+            font-size: 0.875rem; /* text-sm */
+            color: #4b5563; /* gray-700 */
+        }
+        
+        /* Doodle overlay styles */
+        #doodle-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(5px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+        }
+
+        #doodle-overlay.active {
+            display: flex;
+        }
+
+        .doodle-container {
+            background: #fff;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            max-width: 90%;
+            max-height: 90%;
+        }
+
+        #doodle-canvas {
+            border: 1px solid #e5e5e5;
+            background: #fff;
+            cursor: crosshair;
+            touch-action: none; /* Disable default touch actions */
+        }
+
+        .doodle-controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            justify-content: flex-start;
+            align-items: center;
+        }
+        .doodle-controls label {
+            font-weight: 500;
+        }
+        .doodle-controls input[type="color"] {
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+            border: none;
+            background: none;
+            width: 2rem;
+            height: 2rem;
+            cursor: pointer;
+            padding: 0;
+        }
+        .doodle-controls input[type="color"]::-webkit-color-swatch {
+            border-radius: 50%;
+            border: 1px solid #ccc;
+        }
+        .doodle-controls input[type="color"]::-moz-color-swatch {
+            border-radius: 50%;
+            border: 1px solid #ccc;
+        }
+
+        .doodle-controls button {
+            padding: 0.5rem 1rem;
+            border-radius: 0.25rem;
+            cursor: pointer;
+            border: 1px solid #ccc;
+            transition: background-color 0.2s;
+        }
+        #doodle-save-button {
+            background-color: #22c55e;
+            color: white;
+            border-color: #22c55e;
+        }
+        #doodle-save-button:hover {
+            background-color: #16a34a;
+        }
+        #doodle-clear-button {
+            background-color: #ef4444;
+            color: white;
+            border-color: #ef4444;
+        }
+        #doodle-clear-button:hover {
+            background-color: #dc2626;
+        }
+        #doodle-close-button {
+            background-color: #f3f4f6;
+            color: #1f2937;
+            border-color: #d1d5db;
+        }
+        #doodle-close-button:hover {
+            background-color: #e5e7eb;
+        }
+
+        .doodle-image {
+            max-width: 100%;
+            height: auto;
+            margin-top: 1rem; /* Added for spacing */
+            border-radius: 0.5rem;
+        }
+
+    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="m-0 flex items-center justify-center min-h-screen">
+
+    </div>
+
+    <div id="main-content-wrapper" class="w-full h-screen flex flex-col gap-2 p-2 md:p-8">
+        <h1 class="text-3xl md:text-5xl font-extrabold text-center text-gray-800 leading-tight">
+            Adios and All the Best!
+        </h1>
+        <h2 class="self-start inline-block text-xl text-blue-900 font-semibold bg-white border-2 border-blue-900 px-3 py-2 rounded">To Gavin:</h2>
+
+        <div id="message-board" class="message-board-container flex-grow min-h-0">
+            <button id="global-edit-board-button" class="global-board-action-button bottom-4 right-16">
+                <i class="fas fa-pencil-alt"></i>
+            </button>
+            <button id="global-view-board-button" class="global-board-action-button bottom-4 right-4">
+                <i class="fas fa-expand"></i>
+            </button>
+        </div>
+
+        <form id="message-form" class="w-full flex flex-col items-stretch">
+            <div class="w-full flex flex-row flex-wrap items-center gap-2 p-1 bg-white rounded-lg border-2 border-gray-300 relative">
+                <button type="button" id="bold-button" class="format-button p-2 font-bold text-gray-700 rounded-md hover:bg-gray-200 transition-colors duration-200">
+                    B
+                </button>
+                <button type="button" id="italic-button" class="format-button p-2 italic text-gray-700 rounded-md hover:bg-gray-200 transition-colors duration-200">
+                    I
+                </button>
+
+                <select id="font-size-select" class="p-2 border rounded-md">
+                    <option value="8px">8px</option>
+                    <option value="10px">10px</option>
+                    <option value="12px">12px</option>
+                    <option value="14px" selected>14px</option>
+                    <option value="16px">16px</option>
+                    <option value="18px">18px</option>
+                    <option value="20px">20px</option>
+                    <option value="24px">24px</option>
+                    <option value="28px">28px</option>
+                    <option value="32px">32px</option>
+                </select>
+
+                <select id="font-family-select" class="p-2 border rounded-md">
+                <option value="Inter, sans-serif" selected>Inter</option>
+                <option value="'Montserrat', sans-serif">Montserrat</option>
+                <option value="'Poppins', sans-serif">Poppins</option>
+                <option value="'Raleway', sans-serif">Raleway</option>
+                <option value="'Quicksand', sans-serif">Quicksand</option>
+                <option value="'Nunito', sans-serif">Nunito</option>
+                <option value="'Rubik', sans-serif">Rubik</option>
+                <option value="'DM Sans', sans-serif">DM Sans</option>
+                <option value="'Barlow', sans-serif">Barlow</option>
+                <option value="'Work Sans', sans-serif">Work Sans</option>
+                </select>
+
+                <label for="font-color-picker" class="text-sm font-medium text-gray-700">Font Color:</label>
+                <input type="color" id="font-color-picker" value="#000000" class="w-10 h-10 cursor-pointer rounded-full overflow-hidden border-0 p-0 m-0">
+                <label for="note-color-picker" class="text-sm font-medium text-gray-700">Note background:</label>
+                <input type="color" id="note-color-picker" value="#ffffff" class="w-10 h-10 cursor-pointer rounded-full overflow-hidden border-0 p-0 m-0">
+                <label for="background-color-picker" class="text-sm font-medium text-gray-700">Text background:</label>
+                <input type="color" id="background-color-picker" value="#fcfbf8" class="w-10 h-10 cursor-pointer rounded-full overflow-hidden border-0 p-0 m-0">
+                <button type="button" id="doodle-button" class="p-2 text-xl hover:bg-gray-200 rounded-md transition-colors duration-200 flex items-center gap-1">
+                    <i class="fas fa-paint-brush"></i> <span class="text-sm">Doodle</span>
+                </button>
+                <div class="relative inline-block">
+                    <button type="button" id="emoji-button" class="p-2 text-xl hover:bg-gray-200 rounded-md transition-colors duration-200 flex items-center gap-1">
+                        😊 <span class="text-sm">Emoji</span>
+                    </button>
+                    <div id="emoji-picker" class="emoji-picker hidden">
+                        </div>
+                </div>
+
+                <label for="image-upload" class="bg-gray-200 text-gray-700 py-2 px-4 rounded-md cursor-pointer hover:bg-gray-300 transition-colors duration-200">
+                    Attach Image
+                </label>
+                <input type="file" id="image-upload" accept="image/*" class="hidden" multiple>
+                <p class="text-red-600 italic text-[12px]">
+                    Upload up to 3 images.
+                </p>
+                <span id="image-status-text" class="text-gray-700 text-sm"></span>
+                
+            </div>
+
+            <div class="flex flex-col md:flex-row w-full gap-4">
+                <div id="message-input" contenteditable="true" placeholder="Write your message here" class="flex-grow p-4 text-lg border-2 border-gray-300 rounded-lg bg-white text-gray-800 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-gray-400 transition-all duration-300">
+                </div>
+                <button type="submit" class="w-full md:w-auto px-8 py-4 bg-green-700 text-white text-lg font-bold rounded-lg shadow-lg hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500 transition-all duration-300">
+                    Post
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <div id="custom-modal" class="hidden fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center z-[100]">
+        <div class="bg-white p-6 rounded-lg shadow-xl max-w-sm w-full text-center">
+            <p id="modal-message" class="text-lg font-semibold mb-4 text-gray-800"></p>
+            <div class="flex justify-center gap-4">
+                <button id="modal-ok-button" class="bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    OK
+                </button>
+                <button id="modal-cancel-button" class="bg-gray-400 text-white px-6 py-2 rounded-md hover:bg-gray-500 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-gray-300">
+                    Cancel
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <div id="doodle-overlay" class="doodle-overlay">
+        <div class="doodle-container">
+            <canvas id="doodle-canvas"></canvas>
+            <div class="doodle-controls">
+                <label for="doodle-color">Color:</label>
+                <input type="color" id="doodle-color" value="#000000">
+                <label for="doodle-line-width">Line Width:</label>
+                <input type="range" id="doodle-line-width" min="1" max="20" value="5">
+                <button id="doodle-clear-button">Clear</button>
+                <button id="doodle-close-button">Close</button>
+                <button id="doodle-save-button">Save Doodle</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="expanded-board-overlay" class="hidden">
+        <button id="close-expanded-board-button" class="close-expanded-board-button">
+            <i class="fas fa-times"></i>
+        </button>
+        </div>
+
+</html>
+
+<script>
+// --- References ---
+const messageForm = document.getElementById('message-form');
+const messageInput = document.getElementById('message-input');
+const messageBoard = document.getElementById('message-board');
+const boldButton = document.getElementById('bold-button');
+const italicButton = document.getElementById('italic-button');
+const fontSizeSelect = document.getElementById('font-size-select');
+const fontFamilySelect = document.getElementById('font-family-select');
+const fontColorPicker = document.getElementById('font-color-picker');
+const noteColorPicker = document.getElementById('note-color-picker');
+const backgroundColorPicker = document.getElementById('background-color-picker');
+const emojiButton = document.getElementById('emoji-button');
+const emojiPicker = document.getElementById('emoji-picker');
+const imageUploadInput = document.getElementById('image-upload');
+const imageStatusText = document.getElementById('image-status-text');
+const doodleButton = document.getElementById('doodle-button');
+const customModal = document.getElementById('custom-modal');
+const modalMessage = document.getElementById('modal-message');
+const modalOkButton = document.getElementById('modal-ok-button');
+const modalCancelButton = document.getElementById('modal-cancel-button');
+const mainContentWrapper = document.getElementById('main-content-wrapper');
+const globalEditBoardButton = document.getElementById('global-edit-board-button');
+const globalViewBoardButton = document.getElementById('global-view-board-button');
+const expandedBoardOverlay = document.getElementById('expanded-board-overlay');
+const closeExpandedBoardButton = document.getElementById('close-expanded-board-button');
+const doodleOverlay = document.getElementById('doodle-overlay');
+const doodleCanvas = document.getElementById('doodle-canvas');
+const doodleCtx = doodleCanvas.getContext('2d');
+const doodleColorInput = document.getElementById('doodle-color');
+const doodleLineWidthInput = document.getElementById('doodle-line-width');
+const doodleClearButton = document.getElementById('doodle-clear-button');
+const doodleSaveButton = document.getElementById('doodle-save-button');
+const doodleCloseButton = document.getElementById('doodle-close-button');
+
+// --- State ---
+let attachedImages = [];
+let doodleImage = null;
+let isPickerVisible = false;
+let isEditingModeActive = false;
+let activeNote = null;
+let editingExistingDoodleElement = null;
+let isDrawing = false;
+let lastX = 0, lastY = 0;
+
+//live text preview
+let savedRange = null;
+
+messageInput.addEventListener('mouseup', () => {
+    const selection = window.getSelection();
+    if (selection.rangeCount > 0) {
+        savedRange = selection.getRangeAt(0).cloneRange();
+    }
+});
+messageInput.addEventListener('keyup', () => {
+    const selection = window.getSelection();
+    if (selection.rangeCount > 0) {
+        savedRange = selection.getRangeAt(0).cloneRange();
+    }
+});
+
+function restoreSelection() {
+    if (!savedRange) return;
+    const selection = window.getSelection();
+    selection.removeAllRanges();
+    selection.addRange(savedRange);
+}
+
+function applyStyleToSelection(styles) {
+    const selection = window.getSelection();
+    if (!selection.rangeCount || selection.isCollapsed) return;
+    const range = selection.getRangeAt(0);
+    if (!messageInput.contains(range.commonAncestorContainer)) return;
+    const contents = range.extractContents();
+    const span = document.createElement('span');
+    Object.keys(styles).forEach(property => {
+        span.style[property] = styles[property];
+    });
+    span.appendChild(contents);
+    range.insertNode(span);
+}
+
+fontFamilySelect.addEventListener('change', () => {
+    restoreSelection();
+    applyStyleToSelection({ fontFamily: fontFamilySelect.value });
+});
+fontSizeSelect.addEventListener('change', () => {
+    restoreSelection();
+    applyStyleToSelection({ fontSize: fontSizeSelect.value });
+});
+
+fontColorPicker.addEventListener('input', () => {
+    applyStyleToSelection({ color: fontColorPicker.value });
+});
+
+noteColorPicker.addEventListener('input', () => {
+    messageInput.style.backgroundColor = noteColorPicker.value;
+});
+
+backgroundColorPicker.addEventListener('input', () => {
+    applyStyleToSelection({ backgroundColor: backgroundColorPicker.value });
+});
+
+boldButton.addEventListener('click', () => {
+    messageInput.focus();
+    document.execCommand('bold', false, null);
+});
+italicButton.addEventListener('click', () => {
+    messageInput.focus();
+    document.execCommand('italic', false, null);
+});
+
+// --- Image Upload ---
+imageUploadInput.addEventListener('change', (event) => {
+    const files = event.target.files;
+    attachedImages = [];
+    if (files.length > 3) {
+        showCustomModal('You can only upload a maximum of 3 images.', () => {});
+        imageUploadInput.value = '';
+        return;
+    }
+    for (let i = 0; i < files.length; i++) {
+        const file = files[i];
+        if (file.type.startsWith('image/')) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                attachedImages.push({
+                    name: file.name,
+                    dataUrl: e.target.result
+                });
+                updateImageStatusText();
+            };
+            reader.readAsDataURL(file);
+        }
+    }
+    updateImageStatusText();
+});
+const updateImageStatusText = () => {
+    let statusText = '';
+    if (attachedImages.length > 0) {
+        const fileNames = attachedImages.map(img => img.name);
+        statusText += `Images selected: ${fileNames.join(', ')}`;
+    }
+    if (doodleImage) {
+        if (statusText) statusText += ', ';
+        statusText += 'Doodle attached';
+    }
+    imageStatusText.textContent = statusText;
+};
+
+// --- Emoji Picker ---
+function populateEmojiPicker() {
+    const emojis = ['😊', '😂', '😍', '👍', '❤️', '🎉', '🌟', '🙏', '💯', '🚀'];
+    emojiPicker.innerHTML = emojis.map(emoji =>
+        `<button type="button" class="emoji-button">${emoji}</button>`
+    ).join('');
+}
+populateEmojiPicker();
+emojiButton.addEventListener('click', (e) => {
+    e.stopPropagation();
+    isPickerVisible = !isPickerVisible;
+    emojiPicker.classList.toggle('hidden', !isPickerVisible);
+});
+emojiPicker.addEventListener('click', (event) => {
+    if (event.target.classList.contains('emoji-button')) {
+        const emoji = event.target.textContent;
+        messageInput.focus();
+        document.execCommand('insertText', false, emoji);
+    }
+});
+document.addEventListener('click', (e) => {
+    if (isPickerVisible && !emojiPicker.contains(e.target) && e.target !== emojiButton) {
+        emojiPicker.classList.add('hidden');
+        isPickerVisible = false;
+    }
+});
+
+// --- Masonry Layout ---
+const applyMasonryLayout = () => {
+    const grid = document.getElementById('message-board');
+    if (!grid) return;
+    const gap = parseFloat(window.getComputedStyle(grid).gap) || 16;
+    const notes = grid.querySelectorAll('.note-message');
+    notes.forEach(note => {
+        const noteHeight = note.clientHeight;
+        const rowSpan = Math.ceil((noteHeight + gap) / gap);
+        note.style.gridRowEnd = `span ${rowSpan}`;
+    });
+};
+window.addEventListener('resize', applyMasonryLayout);
+
+// --- Modal ---
+const showCustomModal = (message, callback) => {
+    modalMessage.textContent = message;
+    customModal.classList.remove('hidden');
+    void customModal.offsetWidth;
+    customModal.style.opacity = '1';
+    modalOkButton.onclick = () => {
+        customModal.style.opacity = '0';
+        customModal.addEventListener('transitionend', function handler() {
+            customModal.classList.add('hidden');
+            customModal.removeEventListener('transitionend', handler);
+            if (callback) callback(true);
+        }, { once: true });
+    };
+    modalCancelButton.onclick = () => {
+        customModal.style.opacity = '0';
+        customModal.addEventListener('transitionend', function handler() {
+            customModal.classList.add('hidden');
+            customModal.removeEventListener('transitionend', handler);
+            if (callback) callback(false);
+        }, { once: true });
+    };
+};
+
+// --- Hide all actions ---
+const hideAllNoteActions = () => {
+    document.querySelectorAll('.note-message').forEach(note => {
+        note.classList.remove('active-note-for-editing');
+        const textParagraph = note.querySelector('.text-paragraph');
+        if (textParagraph) textParagraph.contentEditable = 'false';
+        const editButton = note.querySelector('.edit-button');
+        if (editButton) {
+            editButton.innerHTML = '<i class="fas fa-pencil-alt"></i>';
+            editButton.title = 'Edit';
+        }
+        note.querySelectorAll('.edit-doodle-button, .delete-doodle-button, .add-doodle-button').forEach(btn => btn.remove());
+    });
+    activeNote = null;
+    editingExistingDoodleElement = null;
+};
+
+// --- Image Action Buttons ---
+function createImageActionButtons(actionsContainer, imgElement, textParagraph, editButton) {
+    // Remove previous image buttons
+    actionsContainer.querySelectorAll('.edit-image-button, .delete-image-button, .add-image-button').forEach(btn => btn.remove());
+    
+    if (imgElement) {
+        // Edit/Replace Image Button
+        const editImageButton = document.createElement('button');
+        editImageButton.classList.add('edit-image-button');
+        editImageButton.innerHTML = '<i class="fas fa-sync-alt"></i>';
+        editImageButton.title = 'Replace Image';
+        editImageButton.addEventListener('click', (e) => {
+            e.stopPropagation();
+            // Create file input for replacing image
+            const fileInput = document.createElement('input');
+            fileInput.type = 'file';
+            fileInput.accept = 'image/*';
+            fileInput.style.display = 'none';
+            fileInput.addEventListener('change', (event) => {
+                const file = event.target.files[0];
+                if (file && file.type.startsWith('image/')) {
+                    const reader = new FileReader();
+                    reader.onload = (ev) => {
+                        imgElement.src = ev.target.result;
+                    };
+                    reader.readAsDataURL(file);
+                }
+            });
+            document.body.appendChild(fileInput);
+            fileInput.click();
+            fileInput.remove();
+        });
+        actionsContainer.appendChild(editImageButton);
+        
+        // Delete Image Button
+        const deleteImageButton = document.createElement('button');
+        deleteImageButton.classList.add('delete-image-button');
+        deleteImageButton.innerHTML = '<i class="fas fa-trash-alt"></i>';
+        deleteImageButton.title = 'Delete Image';
+        deleteImageButton.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const parentNote = imgElement.closest('.note-message');
+            imgElement.remove();
+            // If after removing, note is empty (no text, no doodle, no images), delete the whole note
+            const textIsEmpty = textParagraph.textContent.trim().length === 0;
+            const remainingImages = parentNote.querySelectorAll('img').length;
+            const doodleExists = parentNote.querySelector('.doodle-image');
+            if (textIsEmpty && remainingImages === 0 && !doodleExists) {
+                parentNote.remove();
+            }
+            createImageActionButtons(actionsContainer, null, textParagraph, editButton);
+            requestAnimationFrame(applyMasonryLayout);
+        });
+        actionsContainer.appendChild(deleteImageButton);
+    } else {
+        // Add Image Button
+        const addImageButton = document.createElement('button');
+        addImageButton.classList.add('add-image-button');
+        addImageButton.innerHTML = '<i class="fas fa-image"></i> Add Image';
+        addImageButton.title = 'Add Image';
+        addImageButton.addEventListener('click', (e) => {
+            e.stopPropagation();
+            // Create file input for adding image
+            const fileInput = document.createElement('input');
+            fileInput.type = 'file';
+            fileInput.accept = 'image/*';
+            fileInput.style.display = 'none';
+            fileInput.addEventListener('change', (event) => {
+                const file = event.target.files[0];
+                if (file && file.type.startsWith('image/')) {
+                    const reader = new FileReader();
+                    reader.onload = (ev) => {
+                        const newImg = document.createElement('img');
+                        newImg.src = ev.target.result;
+                        // Optionally add a class for styling
+                        newImg.classList.add('user-image');
+                        const parentNote = actionsContainer.closest('.note-message');
+                        parentNote.appendChild(newImg);
+                        // Recreate image action buttons for new image
+                        createImageActionButtons(actionsContainer, newImg, textParagraph, editButton);
+                        requestAnimationFrame(applyMasonryLayout);
+                    };
+                    reader.readAsDataURL(file);
+                }
+            });
+            document.body.appendChild(fileInput);
+            fileInput.click();
+            fileInput.remove();
+        });
+        actionsContainer.appendChild(addImageButton);
+    }
+}
+
+// --- Doodle Action Buttons ---
+const createDoodleActionButtons = (actionsContainer, doodleImg, textParagraph, editButton) => {
+    actionsContainer.querySelectorAll('.edit-doodle-button, .delete-doodle-button, .add-doodle-button').forEach(btn => btn.remove());
+    if (doodleImg) {
+        // Edit
+        const editDoodleButton = document.createElement('button');
+        editDoodleButton.classList.add('edit-doodle-button');
+        editDoodleButton.innerHTML = '<i class="fas fa-paint-brush"></i>';
+        editDoodleButton.title = 'Edit Doodle';
+        editDoodleButton.addEventListener('click', (doodleEvent) => {
+            doodleEvent.stopPropagation();
+            editingExistingDoodleElement = doodleImg;
+            doodleOverlay.classList.add('active');
+            doodleCanvas.width = window.innerWidth * 0.8;
+            doodleCanvas.height = window.innerHeight * 0.7;
+            const img = new Image();
+            img.onload = () => {
+                doodleCtx.clearRect(0, 0, doodleCanvas.width, doodleCanvas.height);
+                doodleCtx.drawImage(img, 0, 0, doodleCanvas.width, doodleCanvas.height);
+            };
+            img.src = doodleImg.src;
+            doodleCtx.lineWidth = doodleLineWidthInput.value;
+            doodleCtx.strokeStyle = doodleColorInput.value;
+            doodleCtx.lineJoin = 'round';
+            doodleCtx.lineCap = 'round';
+            textParagraph.contentEditable = 'false';
+            editButton.innerHTML = '<i class="fas fa-pencil-alt"></i>';
+            editButton.title = 'Edit';
+        });
+        actionsContainer.appendChild(editDoodleButton);
+        // Delete
+        const deleteDoodleButton = document.createElement('button');
+        deleteDoodleButton.classList.add('delete-doodle-button');
+        deleteDoodleButton.innerHTML = '<i class="fas fa-eraser"></i>';
+        deleteDoodleButton.title = 'Delete Doodle';
+        deleteDoodleButton.addEventListener('click', (doodleEvent) => {
+            doodleEvent.stopPropagation();
+            const parentNote = doodleImg.closest('.note-message');
+            if (textParagraph.textContent.trim().length === 0 && parentNote.querySelectorAll('img').length <= 1) {
+                parentNote.remove();
+            } else {
+                doodleImg.remove();
+            }
+            createDoodleActionButtons(actionsContainer, null, textParagraph, editButton);
+            requestAnimationFrame(applyMasonryLayout);
+        });
+        actionsContainer.appendChild(deleteDoodleButton);
+    } else {
+        // Add
+        const addDoodleButton = document.createElement('button');
+        addDoodleButton.classList.add('add-doodle-button');
+        addDoodleButton.innerHTML = '<i class="fas fa-paint-brush"></i> Add Doodle';
+        addDoodleButton.title = 'Add Doodle';
+        addDoodleButton.addEventListener('click', (doodleEvent) => {
+            doodleEvent.stopPropagation();
+            editingExistingDoodleElement = null;
+            doodleOverlay.classList.add('active');
+            doodleCanvas.width = window.innerWidth * 0.8;
+            doodleCanvas.height = window.innerHeight * 0.7;
+            doodleCtx.clearRect(0, 0, doodleCanvas.width, doodleCanvas.height);
+            doodleCtx.lineWidth = doodleLineWidthInput.value;
+            doodleCtx.strokeStyle = doodleColorInput.value;
+            doodleCtx.lineJoin = 'round';
+            doodleCtx.lineCap = 'round';
+            textParagraph.contentEditable = 'false';
+            editButton.innerHTML = '<i class="fas fa-pencil-alt"></i>';
+            editButton.title = 'Edit';
+        });
+        actionsContainer.appendChild(addDoodleButton);
+    }
+};
+
+// --- Add Message ---
+const addMessage = () => {
+    const messageElement = document.createElement('div');
+    const messageHTML = messageInput.innerHTML.trim();
+    if (!messageHTML && attachedImages.length === 0 && !doodleImage) return;
+    messageElement.style.backgroundColor = messageInput.style.backgroundColor;
+    messageElement.style.color = 'inherit';
+    messageElement.style.fontSize = 'inherit';
+    messageElement.style.fontFamily = 'inherit';
+    const textParagraph = document.createElement('div');
+    textParagraph.innerHTML = messageHTML;
+    textParagraph.classList.add('p-0', 'm-0', 'outline-none', 'text-paragraph');
+    textParagraph.contentEditable = 'false';
+    messageElement.appendChild(textParagraph);
+    attachedImages.forEach(imgObject => {
+        const imageElement = document.createElement('img');
+        imageElement.src = imgObject.dataUrl;
+        messageElement.appendChild(imageElement);
+    });
+    if (doodleImage) {
+        const doodleImgElement = document.createElement('img');
+        doodleImgElement.src = doodleImage;
+        doodleImgElement.alt = "User Doodle";
+        doodleImgElement.classList.add('doodle-image');
+        messageElement.appendChild(doodleImgElement);
+    }
+    const actionsContainer = document.createElement('div');
+    actionsContainer.classList.add('note-actions');
+    const deleteButton = document.createElement('button');
+    deleteButton.innerHTML = '<i class="fas fa-trash-alt"></i>';
+    deleteButton.title = 'Delete';
+    deleteButton.addEventListener('click', (e) => {
+        e.stopPropagation();
+        messageElement.remove();
+        requestAnimationFrame(applyMasonryLayout);
+    });
+    actionsContainer.appendChild(deleteButton);
+    const editButton = document.createElement('button');
+    editButton.classList.add('edit-button');
+    editButton.innerHTML = '<i class="fas fa-pencil-alt"></i>';
+    editButton.title = 'Edit';
+    editButton.addEventListener('click', (e) => {
+        e.stopPropagation();
+        if (textParagraph.contentEditable === 'true') {
+            textParagraph.contentEditable = 'false';
+            editButton.innerHTML = '<i class="fas fa-pencil-alt"></i>';
+            editButton.title = 'Edit';
+            requestAnimationFrame(applyMasonryLayout);
+        } else {
+            textParagraph.contentEditable = 'true';
+            textParagraph.focus();
+            editButton.innerHTML = '<i class="fas fa-check"></i>';
+            editButton.title = 'Save';
+        }
+    });
+    actionsContainer.appendChild(editButton);
+    messageElement.appendChild(actionsContainer);
+    messageElement.classList.add('note-message');
+    messageBoard.appendChild(messageElement);
+    messageBoard.scrollTop = messageBoard.scrollHeight;
+    messageElement.addEventListener('click', (e) => {
+        if (!isEditingModeActive) return;
+        if (e.target.closest('.note-actions')) return;
+        if (messageElement.classList.contains('active-note-for-editing')) {
+            textParagraph.contentEditable = 'true'
+            if (editButton) {
+                editButton.innerHTML = '<i class="fas fa-pencil-alt"></i>';
+                editButton.title = 'Edit';
+            }
+            messageElement.querySelectorAll('.edit-doodle-button, .delete-doodle-button, .add-doodle-button').forEach(btn => btn.remove());
+            activeNote = null;
+        } else {
+            hideAllNoteActions();
+            messageElement.classList.add('active-note-for-editing');
+            activeNote = messageElement;
+            textParagraph.contentEditable = 'false';
+            editButton.innerHTML = '<i class="fas fa-pencil-alt"></i>';
+            editButton.title = 'Edit';
+            const doodleImg = messageElement.querySelector('.doodle-image');
+            createDoodleActionButtons(actionsContainer, doodleImg, textParagraph, editButton);
+                // Image action buttons
+                const images = messageElement.querySelectorAll('img:not(.doodle-image)');
+                if (images.length > 0) {
+                    images.forEach(img => {
+                createImageActionButtons(actionsContainer, img, textParagraph, editButton);
+                    });
+                    
+                } else {         createImageActionButtons(actionsContainer, null, textParagraph, editButton);
+                    
+                }
+        }
+    });
+    attachedImages = [];
+    doodleImage = null;
+    imageUploadInput.value = '';
+    messageInput.innerHTML = '';
+    updateImageStatusText();
+    fontColorPicker.value = '#000000';
+    noteColorPicker.value = '#e0f2f7';
+    backgroundColorPicker.value='#ffffff';
+    messageInput.style.backgroundColor = '#ffffff';
+    requestAnimationFrame(applyMasonryLayout);
+};
+messageForm.addEventListener('submit', function(event) {
+    event.preventDefault();
+    addMessage();
+});
+
+// --- Edit Board ---
+globalEditBoardButton.addEventListener('click', () => {
+    if (!isEditingModeActive) {
+        showCustomModal('Proceed to edit?', (confirmed) => {
+            if (confirmed) {
+                isEditingModeActive = true;
+                messageBoard.classList.add('editing-mode-active');
+                requestAnimationFrame(applyMasonryLayout);
+            }
+        });
+    } else {
+        isEditingModeActive = false;
+        messageBoard.classList.remove('editing-mode-active');
+        hideAllNoteActions();
+        requestAnimationFrame(applyMasonryLayout);
+    }
+});
+
+// --- Expand Board ---
+globalViewBoardButton.addEventListener('click', () => {
+    isEditingModeActive = false;
+    messageBoard.classList.remove('editing-mode-active');
+    hideAllNoteActions();
+    globalEditBoardButton.disabled = true;
+    mainContentWrapper.classList.add('hidden-when-expanded');
+    expandedBoardOverlay.classList.remove('hidden');
+    void expandedBoardOverlay.offsetWidth;
+    expandedBoardOverlay.classList.add('active');
+    expandedBoardOverlay.appendChild(messageBoard);
+    messageBoard.classList.add('flex-grow');
+    messageBoard.classList.remove('min-h-0');
+    requestAnimationFrame(applyMasonryLayout);
+});
+closeExpandedBoardButton.addEventListener('click', () => {
+    expandedBoardOverlay.classList.remove('active');
+    expandedBoardOverlay.addEventListener('transitionend', function handler() {
+        expandedBoardOverlay.classList.add('hidden');
+        expandedBoardOverlay.removeEventListener('transitionend', handler);
+        mainContentWrapper.insertBefore(messageBoard, messageForm);
+        messageBoard.classList.remove('flex-grow');
+        messageBoard.classList.add('min-h-0');
+        mainContentWrapper.classList.remove('hidden-when-expanded');
+        globalEditBoardButton.disabled = false;
+        requestAnimationFrame(applyMasonryLayout);
+    }, { once: true });
+});
+
+// --- Doodle Overlay ---
+doodleButton.addEventListener('click', () => {
+    isEditingModeActive = false;
+    messageBoard.classList.remove('editing-mode-active');
+    hideAllNoteActions();
+    editingExistingDoodleElement = null;
+    doodleOverlay.classList.add('active');
+    doodleCanvas.width = window.innerWidth * 0.8;
+    doodleCanvas.height = window.innerHeight * 0.7;
+    doodleCtx.clearRect(0, 0, doodleCanvas.width, doodleCanvas.height);
+    doodleCtx.lineWidth = doodleLineWidthInput.value;
+    doodleCtx.strokeStyle = doodleColorInput.value;
+    doodleCtx.lineJoin = 'round';
+    doodleCtx.lineCap = 'round';
+});
+doodleCloseButton.addEventListener('click', () => {
+    doodleOverlay.classList.remove('active');
+    doodleCtx.clearRect(0, 0, doodleCanvas.width, doodleCanvas.height);
+    if (activeNote) {
+        const textParagraph = activeNote.querySelector('.text-paragraph');
+        const editButton = activeNote.querySelector('.edit-button');
+        if (textParagraph && isEditingModeActive && editButton && editButton.innerHTML.includes('fa-check')) {
+            textParagraph.contentEditable = 'true';
+        }
+    }
+    editingExistingDoodleElement = null;
+});
+doodleClearButton.addEventListener('click', () => {
+    doodleCtx.clearRect(0, 0, doodleCanvas.width, doodleCanvas.height);
+});
+doodleColorInput.addEventListener('input', (e) => {
+    doodleCtx.strokeStyle = e.target.value;
+});
+doodleLineWidthInput.addEventListener('input', (e) => {
+    doodleCtx.lineWidth = e.target.value;
+});
+
+// --- Doodle Drawing ---
+doodleCanvas.addEventListener('mousedown', (e) => {
+    isDrawing = true;
+    [lastX, lastY] = [e.offsetX, e.offsetY];
+});
+doodleCanvas.addEventListener('mousemove', (e) => {
+    if (!isDrawing) return;
+    doodleCtx.beginPath();
+    doodleCtx.moveTo(lastX, lastY);
+    doodleCtx.lineTo(e.offsetX, e.offsetY);
+    doodleCtx.stroke();
+    [lastX, lastY] = [e.offsetX, e.offsetY];
+});
+doodleCanvas.addEventListener('mouseup', () => isDrawing = false);
+doodleCanvas.addEventListener('mouseout', () => isDrawing = false);
+doodleCanvas.addEventListener('touchstart', (e) => {
+    e.preventDefault();
+    isDrawing = true;
+    const touch = e.touches[0];
+    const rect = doodleCanvas.getBoundingClientRect();
+    [lastX, lastY] = [touch.clientX - rect.left, touch.clientY - rect.top];
+});
+doodleCanvas.addEventListener('touchmove', (e) => {
+    e.preventDefault();
+    if (!isDrawing) return;
+    const touch = e.touches[0];
+    const rect = doodleCanvas.getBoundingClientRect();
+    doodleCtx.beginPath();
+    doodleCtx.moveTo(lastX, lastY);
+    doodleCtx.lineTo(touch.clientX - rect.left, touch.clientY - rect.top);
+    doodleCtx.stroke();
+    [lastX, lastY] = [touch.clientX - rect.left, touch.clientY - rect.top];
+});
+doodleCanvas.addEventListener('touchend', () => isDrawing = false);
+doodleCanvas.addEventListener('touchcancel', () => isDrawing = false);
+
+// --- Doodle Save Logic ---
+const isCanvasBlank = () => {
+    const pixelBuffer = new Uint32Array(
+        doodleCtx.getImageData(0, 0, doodleCanvas.width, doodleCanvas.height).data.buffer
+    );
+    return !pixelBuffer.some(color => color !== 0);
+};
+doodleSaveButton.addEventListener('click', () => {
+    const newDoodleDataUrl = doodleCanvas.toDataURL();
+    // Scenario 1: Editing an existing doodle
+    if (editingExistingDoodleElement) {
+        if (isCanvasBlank()) {
+            const parentNote = editingExistingDoodleElement.closest('.note-message');
+            const textParagraph = parentNote.querySelector('.text-paragraph');
+            if (textParagraph.textContent.trim().length === 0 && parentNote.querySelectorAll('img').length <= 1) {
+                parentNote.remove();
+            } else {
+                editingExistingDoodleElement.remove();
+            }
+            doodleOverlay.classList.remove('active');
+            doodleCtx.clearRect(0, 0, doodleCanvas.width, doodleCanvas.height);
+            editingExistingDoodleElement = null;
+            requestAnimationFrame(applyMasonryLayout);
+            return;
+        }
+        editingExistingDoodleElement.src = newDoodleDataUrl;
+        editingExistingDoodleElement = null;
+        doodleOverlay.classList.remove('active');
+        doodleCtx.clearRect(0, 0, doodleCanvas.width, doodleCanvas.height);
+        requestAnimationFrame(applyMasonryLayout);
+    }
+    // Scenario 2: Adding a new doodle to a posted message
+    else if (activeNote) {
+        const doodleImgElement = document.createElement('img');
+        doodleImgElement.src = newDoodleDataUrl;
+        doodleImgElement.alt = "User Doodle";
+        doodleImgElement.classList.add('doodle-image');
+        activeNote.appendChild(doodleImgElement);
+        const actionsContainer = activeNote.querySelector('.note-actions');
+        if (actionsContainer) {
+            const textParagraph = activeNote.querySelector('.text-paragraph');
+            const editButton = activeNote.querySelector('.edit-button');
+            createDoodleActionButtons(actionsContainer, doodleImgElement, textParagraph, editButton);
+        }
+        doodleOverlay.classList.remove('active');
+        doodleCtx.clearRect(0, 0, doodleCanvas.width, doodleCanvas.height);
+        requestAnimationFrame(applyMasonryLayout);
+    }
+    // Scenario 3: Creating a new doodle for a new message
+    else {
+        doodleImage = newDoodleDataUrl;
+        doodleOverlay.classList.remove('active');
+        doodleCtx.clearRect(0, 0, doodleCanvas.width, doodleCanvas.height);
+        updateImageStatusText();
+        requestAnimationFrame(applyMasonryLayout);
+    }
+});
+
+// --- Initial Setup ---
+window.onload = () => {
+    applyMasonryLayout();
+    document.querySelectorAll('.note-message').forEach(messageElement => {
+        const textParagraph = messageElement.querySelector('.text-paragraph');
+        const editButton = messageElement.querySelector('.edit-button');
+        const deleteButton = messageElement.querySelector('[title="Delete"]');
+        const actionsContainer = messageElement.querySelector('.note-actions');
+        if (textParagraph) textParagraph.contentEditable = 'false';
+        if (editButton) {
+            editButton.innerHTML = '<i class="fas fa-pencil-alt"></i>';
+            editButton.title = 'Edit';
+        }
+        const doodleImg = messageElement.querySelector('.doodle-image');
+        createDoodleActionButtons(actionsContainer, doodleImg, textParagraph, editButton);
+        messageElement.addEventListener('click', (e) => {
+            if (!isEditingModeActive) return;
+            if (e.target.closest('.note-actions')) return;
+            if (messageElement.classList.contains('active-note-for-editing')) {
+                messageElement.classList.remove('active-note-for-editing');
+                if (textParagraph) textParagraph.contentEditable = 'false';
+                if (editButton) {
+                    editButton.innerHTML = '<i class="fas fa-pencil-alt"></i>';
+                    editButton.title = 'Edit';
+                }
+                messageElement.querySelectorAll('.edit-doodle-button, .delete-doodle-button, .add-doodle-button').forEach(btn => btn.remove());
+                activeNote = null;
+            } else {
+                hideAllNoteActions();
+                messageElement.classList.add('active-note-for-editing');
+                activeNote = messageElement;
+                textParagraph.contentEditable = 'false';
+                editButton.innerHTML = '<i class="fas fa-pencil-alt"></i>';
+                editButton.title = 'Edit';
+                const doodleImg = messageElement.querySelector('.doodle-image');
+                createDoodleActionButtons(actionsContainer, doodleImg, textParagraph, editButton);
+            }
+        });
+        if (editButton) {
+            editButton.addEventListener('click', (e) => {
+                e.stopPropagation();
+                if (textParagraph.contentEditable === 'true') {
+                    textParagraph.contentEditable = 'false';
+                    editButton.innerHTML = '<i class="fas fa-pencil-alt"></i>';
+                    editButton.title = 'Edit';
+                    requestAnimationFrame(applyMasonryLayout);
+                } else {
+                    textParagraph.contentEditable = 'true';
+                    textParagraph.focus();
+                    editButton.innerHTML = '<i class="fas fa-check"></i>';
+                    editButton.title = 'Save';
+                }
+            });
+        }
+        if (deleteButton) {
+            deleteButton.addEventListener('click', (e) => {
+                e.stopPropagation();
+                messageElement.remove();
+                requestAnimationFrame(applyMasonryLayout);
+            });
+        }
+    });
+    document.addEventListener('click', (e) => {
+        if (isEditingModeActive && activeNote && !activeNote.contains(e.target) && !e.target.closest('.note-message')
+            && !e.target.closest('#global-edit-board-button')) {
+            hideAllNoteActions();
+        }
+    });
+};
+
+</script>
+</body>
+</html>
